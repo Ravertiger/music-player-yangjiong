@@ -14,37 +14,47 @@
       </div>
     </form>
     <div class="forgot-account">
-      <p>忘记密码？</p>
+      <p @click="showForgetPsw = true">忘记密码？</p>
     </div>
-    <RegisterCom v-if="showRegisterCom" @closeModal="closeRegisterCom" />
+    <RegisterCom v-if="showRegisterCom" @closeModal="showRegisterCom = false" />
+    <ForgetPsw v-if="showForgetPsw" @closeModal="showForgetPsw = false" />
   </div>
 </template>
 
 <script>
 import RegisterCom from '@/components/RegisterCom.vue';
+import ForgetPsw from '@/components/ForgetPsw.vue';
+import http from '@/utils/http';
 export default {
   data() {
     return {
-      showRegisterCom: false,
+      showRegisterCom: false, // 是否显示注册组件
+      showForgetPsw: false, // 是否显示忘记密码组件
       username: '',
       password: '',
-      usernamePlaceholder: '请输入用户名',
-      passwordPlaceholder: '请输入密码',
+      usernamePlaceholder: '邮箱',
+      passwordPlaceholder: '密码',
     };
   },
   components: {
-    RegisterCom,
+    RegisterCom, // 注册两个弹窗型组件（注册和忘记密码）
+    ForgetPsw,
   },
   methods: {
-    login() {
-      // Implement your login logic here
-      console.log('Logging in with:', this.username, this.password);
-      // You may want to add authentication logic here
-      // For simplicity, we're just logging the input values for now
+    login() { // 登录方法
+      http.post('/login', {
+        email: this.username,
+        password: this.password,
+      }).then((res) => {
+        if (res.data.code === 200) {
+          this.$toast.success(res.data.msg);
+          localStorage.setItem('yltoken', res.data.yltoken);
+          this.$router.push('/home');
+        } else {
+          this.$toast.error(res.data.msg);
+        }
+      });
     },
-    closeRegisterCom() {
-      this.showRegisterCom = false
-    }
   },
 };
 </script>

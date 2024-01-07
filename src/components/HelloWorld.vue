@@ -54,7 +54,7 @@
 <script>
 import playIcon from "../assets/play.svg";
 import pauseIcon from "../assets/pause.svg";
-import axios from "axios";
+import http from "@/utils/http";
 export default {
   name: "HelloWorld",
   data() {
@@ -68,6 +68,7 @@ export default {
       playIconPath: playIcon, //初始化最开始为播放图标
       currentVolume: 50, // 初始化音量值
       musicUrl: "",
+      currentPage: 1, // 歌曲页码（每页15首歌，在后台getSongList接口配置）
     };
   },
   methods: {
@@ -188,9 +189,10 @@ export default {
   mounted() {
     this.audio = this.$refs.audioPlayer; // 将引用赋给audio属性
     this.audio.addEventListener('ended', this.handleAudioEnded); //添加结束自动下一曲监听
-    axios.get("http://localhost:6789/getSongList").then((res) => {
+    http.get("http://localhost:6789/getSongList/" + this.currentPage).then((res) => {
       this.items = res.data;
       if (this.items.length > 0) {
+        if(this.items[0] === undefined) return;
         this.currentItem = this.items[0];
         this.musicUrl =
           "http://localhost:6789/getSong/" +
